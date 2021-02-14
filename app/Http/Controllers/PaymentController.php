@@ -33,9 +33,9 @@ class PaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function get_single($service_id){
-         $services = Payment::where('service_id',$service_id)->get();
-         return $services;
+    public function get_single($service_id){
+        $services = Payment::where('service_id',$service_id)->get();
+        return $services;
     }
     public function index()
     {

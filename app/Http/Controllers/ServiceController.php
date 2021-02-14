@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use App\User;
+use Exception;
 
 class ServiceController extends Controller
 {
@@ -83,8 +84,13 @@ class ServiceController extends Controller
         $service->type_of_casket = $request->input('type_of_casket');
         $service->deceased_date = $request->input('deceased_date');
 
-        if($service->save()){
-            return new ServiceResource($service);
+        try{
+            $service->save();
+            return "Successfully Added";
+        }
+       
+        catch(Exception $e){
+            return $e->getMessage();
         }
         
     }
@@ -236,8 +242,8 @@ class ServiceController extends Controller
         $branch_location = User::select('location')->where('branch_id',$branch_id)->first();
         $service = Service::where('id',$contract_id)->where('branch',$branch_id)->get();
     
-        return view('pdf.contract',compact('service','branch_location'));
-        // $pdf = PDF::loadView('pdf.contract',compact('service','branch_location'));
-        // return $pdf->download($service[0]->name.'.pdf');
+        // return view('pdf.contract',compact('service','branch_location'));
+        $pdf = PDF::loadView('pdf.contract',compact('service','branch_location'));
+        return $pdf->download($service[0]->name.'_contract.pdf');
     }
 }
