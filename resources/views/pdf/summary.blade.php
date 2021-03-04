@@ -2,23 +2,14 @@
 <html>
 <head>
 	<title>Print Summary</title>
-	<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<!-- Popper JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body style="font-size: 12px;">
 	
 
 	<div>
-		<img src="https://i.imgur.com/Y3hqiHf.png" width="720">	
+		{{-- <img src="https://i.imgur.com/Y3hqiHf.png" width="500">	 --}}
+		<h1 style="font-size:50px;">MATA DIRECT SERVICES</h1>
+		<hr>
 		<br>
 		<span style="font-size: 18px;">Collection Summary for Month: <strong>{{$month}}</strong> and Year: <strong>{{$year}}</strong></span>
 		<br>
@@ -45,6 +36,8 @@
 				<!-- footer -->
 			</tbody>
 		</table>
+		<br>
+		<br>
 		<br>
 		<strong style="font-size: 19px;">SERVICES THIS MONTH</strong>
 		<table class="table dark">
@@ -77,6 +70,9 @@
 				@endforeach
 			</tbody>
 		</table>
+		<br>
+		<br>
+		<br>
 		<small>Sent from Branch: <strong>{{$branch}}, Surigao del Sur</strong>
 			<br>www.matafuneralhomes.com
 		</small>
@@ -89,3 +85,15 @@
 	
 </body>
 </html>
+<style type="text/css">
+	table, tr, th{
+		border-style: solid;
+		padding:2px;
+	}
+	table, td{
+		padding:2px;
+	} 
+	body{
+		font-family: sans-serif;
+	}
+</style>

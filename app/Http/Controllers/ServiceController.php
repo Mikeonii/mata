@@ -72,17 +72,17 @@ class ServiceController extends Controller
         $service = $request->isMethod('put') ? Service::findOrFail($request->id) : new Service;
 
         $service->contract_no = $request->input('contract_no');
-        $service->name = $request->input('name');
-        $service->name_of_deceased = $request->input('name_of_deceased');
-        $service->address = $request->input('address');
+        $service->name = strtoupper($request->input('name'));
+        $service->name_of_deceased = strtoupper($request->input('name_of_deceased'));
+        $service->address = strtoupper($request->input('address'));
         $service->amount = $request->input('amount');
         $service->branch = $request->input('branch_id');
         $service->down_payment = $request->input('down_payment');
         $service->balance = $request->input('balance');
         $service->phone_number =$request->input('phone_number');
         $service->date_created = $request->input('date_created');
-        $service->type_of_casket = $request->input('type_of_casket');
-        $service->deceased_date = $request->input('deceased_date');
+        $service->type_of_casket = strtoupper($request->input('type_of_casket'));
+        $service->deceased_date = strtoupper($request->input('deceased_date'));
 
         try{
             $service->save();
