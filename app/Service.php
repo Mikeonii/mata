@@ -21,4 +21,7 @@ class Service extends Model implements JWTSubject
     {
         return [];
     }
+    public function payments(){
+        return $this->hasMany(Payment::class);
+    }
 }

@@ -3,11 +3,12 @@
 <head>
 	<title>Print Summary</title>
 </head>
-<body style="font-size: 12px;">
+<body style="font-size: 12px;" onload="window.print()">
 	
 
 	<div>
 		{{-- <img src="https://i.imgur.com/Y3hqiHf.png" width="500">	 --}}
+		<img src="{{ asset("storage/header_mata.png") }}" width="100%"></img>
 		<h1 style="font-size:50px;">MATA DIRECT SERVICES</h1>
 		<hr>
 		<br>
@@ -49,23 +50,23 @@
 					<th>Address</th>
 					<th>Amount</th>
 					<th>Phone Number</th>
-					<th>Down Payment</th>
 					<th>Balance</th>
 					<th>Type of Casket</th>
+					<th>Latest Payment Remarks</th>
 				</tr>
 			</thead>
 			<tbody>
 				@foreach($services as $service)
 				<tr>
-					<td>{{$service->contract_no}}</td>
-					<td>{{$service->name}}</td>
-					<td>{{$service->name_of_deceased}}</td>
-					<td>{{$service->address}}</td>
-					<td>{{$service->amount}}</td>
-					<td>{{$service->phone_number}}</td>
-					<td>{{$service->down_payment}}</td>
-					<td>{{$service->balance}}</td>
-					<td>{{$service->type_of_casket}}</td>
+					<td>{{$service->get('contract_no')}}</td>
+					<td>{{$service->get('name')}}</td>
+					<td>{{$service->get('name_of_deceased')}}</td>
+					<td>{{$service->get('address')}}</td>
+					<td>{{$service->get('contract_amount')}}</td>
+					<td>{{$service->get('phone_number')}}</td>
+					<td>{{$service->get('balance')}}</td>
+					<td>{{$service->get('type_of_casket')}}</td>
+					<td>{{$service->get('remarks')}}</td>
 				</tr>	
 				@endforeach
 			</tbody>
@@ -73,7 +74,7 @@
 		<br>
 		<br>
 		<br>
-		<small>Sent from Branch: <strong>{{$branch}}, Surigao del Sur</strong>
+		<small>Sent from Branch: <strong>{{$branch->branch_location}}</strong>
 			<br>www.matafuneralhomes.com
 		</small>
 	<!-- 	@foreach($results as $res)

@@ -16,4 +16,5 @@ class Payment extends JsonResource
     {
         return parent::toArray($request);
     }
+    
 }

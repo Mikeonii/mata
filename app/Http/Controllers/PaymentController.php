@@ -68,10 +68,15 @@ class PaymentController extends Controller
         $payment->amount = $request->input('amount');
         $payment->mode_of_payment = $request->input('mode_of_payment');
         $payment->remarks = $request->input('remarks');
+        $payment->verified = $request->input('verified');
         $payment->branch_id = $request->input('branch_id');
         $payment->date_created = $request->input('date_created');
-        $payment->verified = $request->input('verified');
-        $payment->save();
+        try{
+            $payment->save();
+        }
+        catch(Exception $e){
+            return $e->getMessage();
+        }
         // deduct payment to balance
         $service = Service::find($request->service_id);
         if($request->input('verified') == 1){
@@ -129,9 +134,24 @@ class PaymentController extends Controller
      */
     public function destroy($id)
     {
-        $payment = Payment::findOrFail($id);
-        if($payment->delete()){
-        	return new PaymentResource($payment);
+        $payment = Payment::find($id); 
+        $service = Service::find($payment->service_id);
+        try{
+            if($payment->verified == '1'){
+                $service->balance = $payment->amount + $service->balance;
+                $service->save();
+                // return "verified";
+            }
+            try{
+                $payment->delete();
+                return $service->balance;
+            }
+            catch(Exception $e){
+                return $e->getMessage();
+            }
+        }
+        catch(Exception $e){
+            $e->getMessage();
         }
     }
     public function get_total($month,$year,$branch_id){

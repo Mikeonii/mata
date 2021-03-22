@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Service;
 use App\Payment;
+use App\Branch;
 use App\Exports\ServiceExport;
 use App\Http\Resources\Service as ServiceResource;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use App\User;
 use Exception;
+use Carbon\Carbon;
 
 class ServiceController extends Controller
 {
@@ -37,17 +39,14 @@ class ServiceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function filtered($branch_id){
-         $services = DB::table('services')->where('branch',$branch_id)->get();
-         return $services;
+        
+        $services = Service::where('branch_id',$branch_id)->get();
+        return $services;
     }
 
     public function index()
     {
-        //get services
-        $services = Service::paginate(15);
-        // return collection of services as a resource
-        return ServiceResource::collection($services);
-
+    
     }
 
     /**
@@ -71,24 +70,33 @@ class ServiceController extends Controller
     {   // check if the method is put. if true, find service true id. else, create a new service. Store in variable $service. 
         $service = $request->isMethod('put') ? Service::findOrFail($request->id) : new Service;
 
+        $service->branch_id = $request->input('branch_id');
         $service->contract_no = $request->input('contract_no');
         $service->name = strtoupper($request->input('name'));
-        $service->name_of_deceased = strtoupper($request->input('name_of_deceased'));
+        $service->status = strtoupper($request->input('status'));
         $service->address = strtoupper($request->input('address'));
-        $service->amount = $request->input('amount');
-        $service->branch = $request->input('branch_id');
-        $service->down_payment = $request->input('down_payment');
-        $service->balance = $request->input('balance');
         $service->phone_number =$request->input('phone_number');
-        $service->date_created = $request->input('date_created');
+        $service->name_of_deceased = strtoupper($request->input('name_of_deceased'));
+        $service->date_of_birth = $request->input('date_of_birth');
+        $service->date_of_death = $request->input('date_of_death');
         $service->type_of_casket = strtoupper($request->input('type_of_casket'));
-        $service->deceased_date = strtoupper($request->input('deceased_date'));
+        $service->days_embalming = $request->input('days_embalming');
+        $service->service_description = $request->input('service_description');
+        $service->freebies_inclusion = $request->input('freebies_inclusion');
+        $service->interment_schedule = $request->input('interment_schedule');
+        $service->contract_amount = $request->input('contract_amount');
+        $service->balance = $request->input('contract_amount');
+        $service->date_created = Carbon::now()->toDateTimeString();
 
         try{
             $service->save();
-            return "Successfully Added";
+            if($request->isMethod('put')){
+                return "Successfully Edited";
+            }
+            else{
+                return $service; 
+            } 
         }
-       
         catch(Exception $e){
             return $e->getMessage();
         }
@@ -142,12 +150,14 @@ class ServiceController extends Controller
     {
         // get service
         $service = Service::findOrFail($id);
-        if($service->delete()){
-               // return as resource
-            return new ServiceResource($service);
+        try{
+            $service->delete();
+            return "Successfully Deleted";
+        }
+        catch(Exception $e){
+            return $e->getMessage();
         }
      
-        
     }
     public function edit_service_info(Request $request){
         $service = Service::findOrFail($request->service_id);
@@ -168,10 +178,10 @@ class ServiceController extends Controller
         $month = $request->month;
         $branch_id = $request->branch_id;
 
-        $count_month = Service::whereMonth('created_at',$month)->where('branch',$branch_id)->count();
-        $count_year = Service::whereYear('created_at',$year)->where('branch',$branch_id)->count();
+        $count_month = Service::whereMonth('date_created',$month)->where('branch_id',$branch_id)->count();
+        $count_year = Service::whereYear('date_created',$year)->where('branch_id',$branch_id)->count();
 
-        return array($count_month,$count_year);
+        return collect(['count_month'=>$count_month,'count_year'=>$count_year]);
     }
     public function print_summary($month,$year,$branch_id){
 
@@ -223,27 +233,91 @@ class ServiceController extends Controller
         $results = array($dswd,$mswdo,$lgu,$pswd,$cheque,$total_discount,$cash_on_hand,$total_cash_collected);
         $date = date("Y-M-d");
 
-        if($branch_id == '1'){
-            $branch = 'Cantilan';
-        }
+       $branch = Branch::select('branch_location')->where('id',$branch_id)->first();
 
         // get services this month from branch number
 
-        $services = Service::whereMonth('date_created',$month)->whereYear('date_created',$year)->where('branch',$branch_id)->get();
+        $services = Service::whereMonth('date_created',$month)->whereYear('date_created',$year)->where('branch_id',$branch_id)->get();
 
-        // return view('pdf.summary',compact('results','year','month','branch','services'));
+        $services = $services->map(function($q){
+            // $last = Payment::find($q->id)
+            $last = Payment::where('service_id',$q->id)->latest('created_at')->first();
+            if($last != null){
+                $rem = $last->remarks;
+            }
+            else{
+                $rem = "No payments found";
+            }
+            $new = collect([
+                'contract_no'=>$q->contract_no,
+                'name'=>$q->name,
+                'name_of_deceased'=>$q->name_of_deceased,
+                'address'=>$q->address,
+                'amount'=>$q->amount,
+                'phone_number'=>$q->phone_number,
+                'balance'=>$q->balance,
+                'type_of_casket'=>$q->type_of_casket,
+                'remarks'=>$rem
+                ]);
+            return $new;
+        });
+        // return $services;
 
-        $pdf = PDF::loadView('pdf.summary',compact('results','year','month','branch','services'));
-        return $pdf->download($month.'-'.$year.'-'.'results.pdf');
+        return view('pdf.summary',compact('results','year','month','branch','services'));
+
+        // $pdf = PDF::loadView('pdf.summary',compact('results','year','month','branch','services'));
+        // return $pdf->download($month.'-'.$year.'-'.'results.pdf');
 
     }
     public function print_contract($contract_id, $branch_id){
         // get branch location
-        $branch_location = User::select('location')->where('branch_id',$branch_id)->first();
-        $service = Service::where('id',$contract_id)->where('branch',$branch_id)->get();
-    
-        // return view('pdf.contract',compact('service','branch_location'));
-        $pdf = PDF::loadView('pdf.contract',compact('service','branch_location'));
-        return $pdf->download($service[0]->name.'_contract.pdf');
+        // $branch_location = User::select('location')->where('branch_id',$branch_id)->first();
+        $branch_location = Branch::find($branch_id) ;
+        $service = Service::where('id',$contract_id)->where('branch_id',$branch_id)->get();
+        $first_payment = Payment::where('service_id',$contract_id)->where('branch_id',$branch_id)->where('mode_of_payment','Down Payment')->first();
+        $payments = Payment::where('service_id',$contract_id)->where('branch_id',$branch_id)->get();
+        // return $first_payment;
+        return view('pdf.contract',compact('service','branch_location','first_payment','payments'));
+        // $pdf = PDF::loadView('pdf.contract',compact('service','branch_location','first_payment'));
+        // return $pdf->download($service[0]->name.'_contract.pdf');
+    }
+    public function filtered_service($branch_id){
+        
+        $cheque = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','Cheque');
+        })->where('branch_id',$branch_id)->get();
+        $cash_on_hand = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','Cash On-hand');
+        })->where('branch_id',$branch_id)->get();
+        $mswdo = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','MSWDO');
+        })->where('branch_id',$branch_id)->get();
+        $lgu = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','LGU');
+        })->where('branch_id',$branch_id)->get();
+        $dswd_caraga = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','DSWD CARAGA');
+        })->where('branch_id',$branch_id)->get();
+        $pswd = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','PSWD');
+        })->where('branch_id',$branch_id)->get();
+        $pgo = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','PGO');
+        })->where('branch_id',$branch_id)->get();
+        $down_payment = Service::whereHas('payments',function($q){
+            $q->where('mode_of_payment','Down Payment');
+        })->where('branch_id',$branch_id)->get();
+        $col = collect([
+            'cheque'=>$cheque,
+            'cash_on_hand'=>$cash_on_hand,
+            'mswdo'=>$mswdo,
+            'lgu'=>$lgu,
+            'dswb_caraga'=>$dswd_caraga,
+            'pswd'=>$pswd,
+            'pgo'=>$pgo,
+            'down_payment'=>$down_payment,
+
+        ]);
+        return $col;
     }
 }

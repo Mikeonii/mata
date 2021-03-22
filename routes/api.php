@@ -26,8 +26,6 @@ Route::group(['prefix'=>'auth','namespace'=>'Auth'],function(){
     Route::get('me','MeController');
 });
 
-// List Services
-Route::get('services','ServiceController@index');
 // List single Service
 Route::get('service/{id}','ServiceController@show');
 // Create Service
@@ -42,6 +40,8 @@ Route::get('services/{branch_id}','ServiceController@filtered');
 Route::put('edit_service_info','ServiceController@edit_service_info');
 // Get total Service
 Route::post('get_total_service','ServiceController@get_total_service');
+// Get filtered payments from mode of payments
+Route::get('get_filtered_service/{branch_id}','ServiceController@filtered_service');
 
 
 // PAYMENTS
