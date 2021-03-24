@@ -253,6 +253,7 @@ class ServiceController extends Controller
                 'name'=>$q->name,
                 'name_of_deceased'=>$q->name_of_deceased,
                 'address'=>$q->address,
+                'contract_amount'=>$q->contract_amount,
                 'amount'=>$q->amount,
                 'phone_number'=>$q->phone_number,
                 'balance'=>$q->balance,
@@ -285,28 +286,52 @@ class ServiceController extends Controller
         
         $cheque = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','Cheque');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','Cheque');
+        }))->get();
+
         $cash_on_hand = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','Cash On-hand');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','Cash On-hand');
+        }))->get();
+
         $mswdo = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','MSWDO');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','MSWDO');
+        }))->get();
+
         $lgu = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','LGU');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','LGU');
+        }))->get();
+
         $dswd_caraga = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','DSWD CARAGA');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','DSWD CARAGA');
+        }))->get();
+
         $pswd = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','PSWD');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','PSWD');
+        }))->get();
+
         $pgo = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','PGO');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','PGO');
+        }))->get();
+
         $down_payment = Service::whereHas('payments',function($q){
             $q->where('mode_of_payment','Down Payment');
-        })->where('branch_id',$branch_id)->get();
+        })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
+            $q->where('mode_of_payment','Down Payment');
+        }))->get();
+
         $col = collect([
             'cheque'=>$cheque,
             'cash_on_hand'=>$cash_on_hand,
