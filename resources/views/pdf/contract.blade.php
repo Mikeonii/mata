@@ -18,7 +18,7 @@
 			
 {{-- 
 			<p>Branch:{{$branch_location->branch_location}}</p> --}}
-			{{-- fuck this --}}
+			{{-- fuck thisqqww --}}
 		</div>
 		
 		<br>
