@@ -4,3 +4,4 @@ deployment:
     - export DEPLOYPATH=/home/matadire/public_html/app-server.matadirectservice
     - /bin/cp -a * $DEPLOYPATH
     # - /bin/cp index.html $DEPLOYPATH
+    # so this is it really i can feel it.
