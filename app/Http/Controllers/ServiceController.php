@@ -83,7 +83,8 @@ class ServiceController extends Controller
         $service->days_embalming = $request->input('days_embalming');
         $service->service_description = $request->input('service_description');
         $service->freebies_inclusion = $request->input('freebies_inclusion');
-        $service->interment_schedule = $request->input('interment_schedule');
+        // $service->interment_schedule = $request->input('interment_schedule');
+        $service->interment_schedule = '2020-02-02';
         $service->contract_amount = $request->input('contract_amount');
         $service->balance = $request->input('contract_amount');
         $service->date_created = Carbon::now()->toDateTimeString();
@@ -152,7 +153,16 @@ class ServiceController extends Controller
         $service = Service::findOrFail($id);
         try{
             $service->delete();
-            return "Successfully Deleted";
+            // delete payments
+            try{
+                Payment::where('service_id',$id)->delete();
+                return "Successfully Deleted";
+            }
+            catch(Exception $e){
+                return $e->getMessage();
+            }
+
+            
         }
         catch(Exception $e){
             return $e->getMessage();
@@ -187,42 +197,59 @@ class ServiceController extends Controller
 
         // convert cash on hand to cash_on_hand
         $month+=1;
-        $dswd = Payment::where([
-            ['mode_of_payment','DSWD'],
+        $dswd_caraga = Payment::where([
+            ['mode_of_payment','DSWD-CARAGA'],
             ['branch_id',$branch_id],
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
+
         $mswdo = Payment::where([
             ['mode_of_payment','MSWDO'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
+
         $lgu = Payment::where([
             ['mode_of_payment','LGU'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
+
         $pswd = Payment::where([
             ['mode_of_payment','PSWD'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
+
         $cheque = Payment::where([
             ['mode_of_payment','Cheque'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
-        $total_discount = Payment::where([
-            ['mode_of_payment','discount'],
-            ['branch_id',$branch_id]
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
+
+        // $total_discount = Payment::where([
+        //     ['mode_of_payment','discount'],
+        //     ['branch_id',$branch_id]
+        // ])->whereMonth('date_created',$month)
+        // ->whereYear('date_created',$year)->sum('amount');
+
          $cash_on_hand = Payment::where([
             ['mode_of_payment','Cash On-hand'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
          ->whereYear('date_created',$year)->sum('amount');
 
+        $pgo = Payment::where([
+            ['mode_of_payment','PGO'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+         ->whereYear('date_created',$year)->sum('amount');
+
+           $down_payment = Payment::where([
+            ['mode_of_payment','Down Payment'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+         ->whereYear('date_created',$year)->sum('amount');
         $total_cash_collected = Payment::where([
                 ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
@@ -230,7 +257,19 @@ class ServiceController extends Controller
         
         // create an object to return
         // DSWD - MSWDO - LGU - PSWD - CHEQUE - TOTAL DISCOUNT - CASH - TOTAL CASH
-        $results = array($dswd,$mswdo,$lgu,$pswd,$cheque,$total_discount,$cash_on_hand,$total_cash_collected);
+        // $results = array($dswd,$mswdo,$lgu,$pswd,$cheque,$cash_on_hand,
+        //     $total_cash_collected);
+        $results = collect([
+            'dswd-caraga'=>$dswd_caraga,
+            'mswdo'=>$mswdo,
+            'lgu'=>$lgu,
+            'pswd'=>$pswd,
+            'cheque'=>$cheque,
+            'pgo'=>$pgo,
+            'down_payment'=>$down_payment,
+            'cash_on_hand'=>$cash_on_hand,
+            'total_cash_collected'=>$total_cash_collected
+        ]);
         $date = date("Y-M-d");
 
        $branch = Branch::select('branch_location')->where('id',$branch_id)->first();
@@ -309,9 +348,9 @@ class ServiceController extends Controller
         }))->get();
 
         $dswd_caraga = Service::whereHas('payments',function($q){
-            $q->where('mode_of_payment','DSWD CARAGA');
+            $q->where('mode_of_payment','DSWD-CARAGA');
         })->where('branch_id',$branch_id)->with(array('payments'=> function($q){
-            $q->where('mode_of_payment','DSWD CARAGA');
+            $q->where('mode_of_payment','DSWD-CARAGA');
         }))->get();
 
         $pswd = Service::whereHas('payments',function($q){
@@ -337,7 +376,7 @@ class ServiceController extends Controller
             'cash_on_hand'=>$cash_on_hand,
             'mswdo'=>$mswdo,
             'lgu'=>$lgu,
-            'dswb_caraga'=>$dswd_caraga,
+            'dswd_caraga'=>$dswd_caraga,
             'pswd'=>$pswd,
             'pgo'=>$pgo,
             'down_payment'=>$down_payment,

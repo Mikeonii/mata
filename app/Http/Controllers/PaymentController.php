@@ -157,51 +157,71 @@ class PaymentController extends Controller
     public function get_total($month,$year,$branch_id){
         // convert cash on hand to cash_on_hand
 
-        $dswd = Payment::where([
-            ['mode_of_payment','DSWD'],
-            ['branch_id',$branch_id],
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
-        $mswdo = Payment::where([
-            ['mode_of_payment','MSWDO'],
-            ['branch_id',$branch_id]
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
-        $lgu = Payment::where([
-            ['mode_of_payment','LGU'],
-            ['branch_id',$branch_id]
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
-        $pswd = Payment::where([
-            ['mode_of_payment','PSWD'],
-            ['branch_id',$branch_id]
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
         $cheque = Payment::where([
             ['mode_of_payment','Cheque'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
-        $total_discount = Payment::where([
-            ['mode_of_payment','discount'],
-            ['branch_id',$branch_id]
-        ])->whereMonth('date_created',$month)
-        ->whereYear('date_created',$year)->sum('amount');
-         $cash_on_hand = Payment::where([
+
+        $cash_on_hand = Payment::where([
             ['mode_of_payment','Cash On-hand'],
             ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
-         ->whereYear('date_created',$year)->sum('amount');
+        ->whereYear('date_created',$year)->sum('amount');
+
+        $mswdo = Payment::where([
+            ['mode_of_payment','MSWDO'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
+       
+        $lgu = Payment::where([
+            ['mode_of_payment','LGU'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
+
+        $dswd_caraga = Payment::where([
+            ['mode_of_payment','DSWD-CARAGA'],
+            ['branch_id',$branch_id],
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
+
+        $pswd = Payment::where([
+            ['mode_of_payment','PSWD'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
+
+        $pgo = Payment::where([
+            ['mode_of_payment','PGO'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
+
+        $down_payment = Payment::where([
+            ['mode_of_payment','Down Payment'],
+            ['branch_id',$branch_id]
+        ])->whereMonth('date_created',$month)
+        ->whereYear('date_created',$year)->sum('amount');
 
         $total_cash_collected = Payment::where([
                 ['branch_id',$branch_id]
         ])->whereMonth('date_created',$month)
         ->whereYear('date_created',$year)->sum('amount');
         
-        // create an object to return
-        // DSWD - MSWDO - LGU - PSWD - CHEQUE - TOTAL DISCOUNT - CASH - TOTAL CASH
-        return array($dswd,$mswdo,$lgu,$pswd,$cheque,$total_discount,$cash_on_hand,$total_cash_collected);
-
+        $total = collect([
+            'cheque'=>$cheque,
+            'cash_on_hand'=>$cash_on_hand,
+            'mswdo'=>$mswdo,
+            'lgu'=>$lgu,
+            'dswd_caraga'=>$dswd_caraga,
+            'pswd'=>$pswd,
+            'pgo'=>$pgo,
+            'down_payment'=>$down_payment,
+            'total_cash_collected'=>$total_cash_collected
+        ]);
+        return $total;
     }
     // public function export_to_excel($month,$year,$branch_id){
 

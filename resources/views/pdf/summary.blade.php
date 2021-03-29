@@ -18,21 +18,28 @@
 		<table class="table">
 			<thead>
 				<tr>
-					<th>DSWD</th>
+					<th>Cheque</th>
+					<th>Cash on hand</th>
 					<th>MSWDO</th>
 					<th>LGU</th>
+					<th>DSWD Caraga</th>
 					<th>PSWD</th>
-					<th>Cheque</th>
-					<th>Total Discount</th>
-					<th>Cash on hand</th>
-					<th>Amount of Cash Collected</th>
+					<th>PGO</th>
+					<th>Down Payment</th>
+					<th>Total</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					@foreach($results as $res)
-						<td>{{$res}}</td>
-					@endforeach
+					<td>{{$results->get('cheque')}}</td>
+					<td>{{$results->get('cash_on_hand')}}</td>
+					<td>{{$results->get('mswdo')}}</td>
+					<td>{{$results->get('lgu')}}</td>
+					<td>{{$results->get('dswd-caraga')}}</td>
+					<td>{{$results->get('pswd')}}</td>
+					<td>{{$results->get('pgo')}}</td>
+					<td>{{$results->get('down_payment')}}</td>
+					<td>{{$results->get('total_cash_collected')}}</td>	
 				</tr>
 				<!-- footer -->
 			</tbody>

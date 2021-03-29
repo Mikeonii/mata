@@ -38,7 +38,7 @@
 			<p><strong>Days Embalming: </strong>{{$row->days_embalming}}</p>
 			<p><strong>Service Description: </strong>{{$row->service_description}}</p>
 			<p><strong>Freebies Inclusion: </strong>{{$row->freebies_inclusion}}</p>
-			<p><strong>Interment Schedule: </strong>{{$row->interment_schedule}}</p>
+		{{-- 	<p><strong>Interment Schedule: </strong>{{$row->interment_schedule}}</p> --}}
 			
 			<hr>
 			<h2>Payments Information</h2>
@@ -86,7 +86,7 @@
 			<p>That in consideration of the foregoing Services to be rendered, I hereby assumed to pay to the MATA FUNERAL HOMES & PLAN, INC. {{$branch_location->branch_location}} Branch, the sum of <strong>{{$row->contract_amount}}</strong> Pesos.
 
 			<p>I hereby promise to pay the balance of <strong>{{$row->balance}}</strong> pesos upon termination of all services.</p>
-			<p>In case of non-payment Maturity, I further agree to pay the cost expenses & Attorney's fee for collection in case of legal steps are taken before the court. I further agree any competent courts in Tandag City, Cantilan Surigao del Sur.</p>
+			<p>In case of non-payment Maturity, I further agree to pay the cost expenses & Attorney's fee for collection in case of legal steps are taken before the court. I further agree in any competent courts.</p>
 
 			<br>
 			<br>
